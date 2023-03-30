@@ -1,0 +1,140 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+/*
+Josephus        -- Done
+Prime-checker   -- Done
+DivisibleByX    -- Done
+*/
+
+bool isItPrime(int n) {
+    if (n < 2) {
+        return false;
+    }
+    for (int i = 2; i*i <= n; i++) {
+        if (n % i == 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
+// define a linked list node
+struct Node {
+    int value;
+    struct Node *next;
+};
+
+// function to create a new node with a given value
+struct Node *createNode(int value) {
+    struct Node *newNode = (struct Node*) malloc(sizeof(struct Node));
+    newNode->value = value;
+    newNode->next = NULL;
+    return newNode;
+}
+
+// function to append a new node to the end of a linked list
+void appendNode(struct Node **head, int value) {
+    struct Node *newNode = createNode(value);
+    if (*head == NULL) {
+        *head = newNode;
+        (*head)->next = *head;
+    } else {
+        struct Node *temp = *head;
+        while (temp->next != *head) {
+            temp = temp->next;
+        }
+        temp->next = newNode;
+        newNode->next = *head;
+    }
+}
+
+// function to remove a node from a linked list
+void removeNode(struct Node **head, struct Node *node) {
+    if (*head == NULL) {
+        return;
+    }
+    if (*head == node) {
+        *head = node->next;
+    }
+    struct Node *temp = *head;
+    while (temp->next != node) {
+        temp = temp->next;
+    }
+    temp->next = node->next;
+    free(node);
+}
+
+// function to solve the problem using a linked list
+int theCircle(int n, int k) {
+    struct Node *head = NULL;
+    for (int i = 1; i <= n; i++) {
+        appendNode(&head, i);
+    }
+    struct Node *curr = head;
+    while (n > 1) {
+        for (int i = 1; i < k; i++) {
+            curr = curr->next;
+        }
+        struct Node *temp = curr->next;
+        removeNode(&head, curr);
+        curr = temp;
+        n--;
+    }
+    return head->value;
+}
+
+int rounds(int cases, int N[], int F[], int I[], int X[]){
+    int i, help = 0, lose = 0;
+    for(i = 0; i < cases; i++){
+
+        printf("#%d\nThe representative for round %d is %d.\n", i+1, i+1, theCircle(N[i]-F[i], I[i]));
+        if(theCircle(N[i]-F[i], I[i]) % X[i] == 0){
+            printf("Yay, the teacher's gonna be participating in round %d!\n", i+1);
+            help++;
+            if(isItPrime(theCircle(N[i]-F[i], I[i]))){
+                printf("Nodi's class is gonna win this round.\n");
+            }
+            else{
+                printf("But their class is gonna lose.\n");
+                lose++;
+            }
+        }
+        else{
+            printf("Unfortunately, the teacher doesn't want to particpate in round %d.\n", i+1);
+            if(isItPrime(theCircle(N[i]-F[i], I[i]))){
+                printf("But Nodi's class is gonna win this round.\n");
+            }
+            else{
+                printf("And their class is gonna lose.\n");
+                lose++;
+            }
+        }
+        printf("\n");
+        printf("\n");
+    }
+    if(help >= lose){
+        printf("They don't have to clean the school when the contest is over.");
+    }
+    else{
+        printf("They have to clean the school for %d hour(s).", lose - help);
+    }
+}
+
+int main(){
+    //printf("Jumlah babak pentas seni: ");
+    int B, i;
+    scanf("%d", &B);
+    int N[B], F[B], I[B], X[B];
+
+    for(i = 0; i < B; i++){
+        //printf("Round %d: ", i + 1);
+        scanf("%d%d%d%d", &N[i], &F[i], &I[i], &X[i]);
+    }
+    printf("\n");
+
+    rounds(B, N, F, I, X);
+
+    return 0;
+}
